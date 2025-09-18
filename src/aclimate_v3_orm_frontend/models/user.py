@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Enum, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from ..database.base import Base
-from ..enums.enums import ProfileType
+from ..enums.profile_type import ProfileType
 from datetime import datetime, timezone
 
 class User(Base):
