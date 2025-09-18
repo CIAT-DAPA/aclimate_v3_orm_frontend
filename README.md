@@ -1,44 +1,48 @@
-# AClimate V3 ORM ⛅️💾
+# AClimate V3 ORM Frontend ⛅️💾
 
 ## 🏷️ Version & Tags
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/CIAT-DAPA/aclimate_v3_orm) ![](https://img.shields.io/github/v/tag/CIAT-DAPA/aclimate_v3_orm)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/CIAT-DAPA/aclimate_v3_orm_frontend) ![](https://img.shields.io/github/v/tag/CIAT-DAPA/aclimate_v3_orm_frontend)
 
 ## 📌 Introduction
 
-AClimate V3 ORM is an Object-Relational Mapping package designed for the AClimate platform. It facilitates interaction with relational databases for climate data models, forecast systems, agricultural zones, and administrative boundaries. The package provides a structured interface for accessing and manipulating climate historical data at different temporal resolutions.
+AClimate V3 ORM Frontend is an Object-Relational Mapping package designed for the AClimate platform's frontend services. It facilitates interaction with relational databases for user management, application configuration, and weather station interest tracking. The package provides a structured interface for managing frontend-specific data including user profiles, app configurations, and notification preferences.
 
-This is an ORM (Object-Relational Mapping) built with the SQLAlchemy library for interfacing with relational databases.
+This is an ORM (Object-Relational Mapping) built with the SQLAlchemy library for interfacing with relational databases, specifically designed for frontend application needs.
 
 ## Documentation
 
-For complete documentation, visit the [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/CIAT-DAPA/aclimate_v3_orm)
+For complete documentation, visit the [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/CIAT-DAPA/aclimate_v3_orm_frontend)
 
 ## Features
 
-- Modular structure organized by domain (climate, forecast, catalog, administrative, etc.)
+- Modular structure organized by domain (user management, app configuration, notifications)
 - Built using SQLAlchemy for efficient relational mapping
+- Pydantic schemas for data validation and serialization
+- Service layer pattern with comprehensive validation
+- Enum support for type-safe profile management
+- JSON column support for flexible notification configurations
 - Compatible with Python > 3.10
-- Designed for integration into larger AClimate infrastructure
+- Designed for integration into AClimate frontend infrastructure
 
 ## ✅ Requirements
 
 - Python > 3.10
 - Relational database (PostgreSQL recommended, also compatible with MySQL and SQLite)
-- Dependencies: SQLAlchemy, psycopg2, python-dotenv, typing_extensions, pydantic
+- Dependencies: SQLAlchemy, pydantic, typing_extensions
 
 # Installation
 
 Install directly from GitHub:
 
 ```bash
-pip install git+https://github.com/CIAT-DAPA/aclimate_v3_orm
+pip install git+https://github.com/CIAT-DAPA/aclimate_v3_orm_frontend
 ```
 
 To install a specific version:
 
 ```bash
-pip install git+https://github.com/CIAT-DAPA/aclimate_v3_orm@v0.0.9
+pip install git+https://github.com/CIAT-DAPA/aclimate_v3_orm_frontend@v0.0.1
 ```
 
 ## 🔧 Environment Configuration
@@ -83,47 +87,77 @@ Examples
 
 ```python
 # Models
-from aclimate_v3_orm.models import (
-    ClimateHistoricalMonthly,
-    MngCountry,
-    MngLocation
+from aclimate_v3_orm_frontend.models import (
+    App,
+    User,
+    WsInterested
 )
-#Services
-from aclimate_v3_orm.services import (
-    ClimateHistoricalMonthlyService,
-    MngCountryService,
-    MngLocationService
+
+# Services
+from aclimate_v3_orm_frontend.services import (
+    AppService,
+    UserService,
+    WsInterestedService
 )
-#Schemas
-from aclimate_v3_orm.schemas import (
-    LocationCreate, LocationRead, LocationUpdate,
-    CountryCreate, CountryRead, CountryUpdate,
-    ClimateHistoricalClimatologyCreate, ClimateHistoricalClimatologyRead, ClimateHistoricalClimatologyUpdate
+
+# Schemas
+from aclimate_v3_orm_frontend.schemas import (
+    AppCreate, AppRead, AppUpdate,
+    UserCreate, UserRead, UserUpdate,
+    WsInterestedCreate, WsInterestedRead, WsInterestedUpdate
 )
+
+# Enums
+from aclimate_v3_orm_frontend.enums import ProfileType
 ```
 
 ### Using
 
 ```python
+# Init services
+app_service = AppService()
+user_service = UserService()
+ws_service = WsInterestedService()
 
-#Init service
-country_service = MngCountryService()
-
-#Create new register
-new_country = CountryCreate(
-    name= "Colombia",
-    iso2= "CL",
-    enable= True
+# Create new app
+new_app = AppCreate(
+    name="AClimate Colombia",
+    country_ext_id="1",
+    enable=True
 )
 
-country = country_service.create(obj_in=new_country)
+app = app_service.create(obj_in=new_app)
+print(app)
 
-print(country)
+# Create new user
+new_user = UserCreate(
+    ext_key_clock_id="keycloak_user_123",
+    app_id=app.id,
+    profile=ProfileType.FARMER,
+    enable=True
+)
 
-#Get register
-countries = country_service.get_all()
-print(countries)
+user = user_service.create(obj_in=new_user)
+print(user)
 
+# Create weather station interest
+new_ws_interest = WsInterestedCreate(
+    user_id=user.id,
+    ws_ext_id="1",
+    notification={"email": True, "sms": False, "push": True}
+)
+
+ws_interest = ws_service.create(obj_in=new_ws_interest)
+print(ws_interest)
+
+# Get data
+apps = app_service.get_all()
+users_by_app = user_service.get_by_app(app.id)
+user_interests = ws_service.get_by_user(user.id)
+
+print(f"Total apps: {len(apps)}")
+print(f"Users in app: {len(users_by_app)}")
+print(f"User interests: {len(user_interests)}")
 ```
 
 ## 🧪 Testing
@@ -134,55 +168,37 @@ The test suite is organized to validate all service components:
 
 ```bash
 tests/
-├── conftest.py #test config
-├── test_climate_historical_climatology_service.py
-├── test_climate_historical_daily_service.py
-├── test_climate_historical_monthly_service.py
-├── test_mng_admin_1_service.py
-├── test_mng_admin_2_service.py
-├── test_mng_climate_measure_service.py
-├── test_mng_country_service.py
-└── test_mng_location_service.py
+├── conftest.py           # Test configuration and fixtures
+├── test_app.py          # App service and validator tests
+├── test_user.py         # User service and validator tests
+├── test_ws_interested.py # Weather station interest tests
+└── test_enums.py        # Enum functionality tests
 ```
-
-### Key Characteristics
-
-1. **Service-Centric Testing**:
-
-   - Each production service has a dedicated test file
-   - Tests validate both business logic and database interactions
-
-2. **Test Categories**:
-
-   - **Climate Services**: Focus on temporal data operations
-   - **Management Services**: Validate CRUD operations for reference data
-
-3. **Configuration**:
-
-   - `conftest.py` contains:
-     - Database fixtures (in-memory SQLite)
-     - Mock configurations
-     - Shared test utilities
-
-4. **Testing Approach**:
-   - 100% service layer coverage
-   - Integration-style tests with real database operations
-   - Mocking only for external dependencies
 
 ### Example Test Execution
 
 ```bash
 # Set up environment
 python -m venv env
-source env/bin/activate
+source env/bin/activate  # Linux/Mac
+# or
+env\Scripts\activate     # Windows
+
 # Install test dependencies
 pip install pytest pytest-mock pytest-cov
-# Run all tests
+
+# Run all tests (Linux/Mac)
 PYTHONPATH=$PYTHONPATH:./src pytest tests/
 
+# Run all tests (Windows PowerShell)
+set PYTHONPATH=%PYTHONPATH%;./src && pytest tests/
+
 # Specific test examples:
-pytest tests/test_climate_historical_daily_service.py -v  # Run specific test file
-pytest -k "test_get_daily_data"  # Run tests matching pattern
+pytest tests/test_app.py -v              # Run app tests
+pytest tests/test_user.py -v             # Run user tests
+pytest tests/test_ws_interested.py -v    # Run weather station tests
+pytest -k "test_create"                  # Run tests matching pattern
+pytest --cov=src tests/                  # Run with coverage
 ```
 
 > [!NOTE]  
@@ -198,78 +214,95 @@ Our GitHub Actions pipeline implements a three-stage deployment process:
 Code Push → Test Stage → Merge Stage → Release Stage
 ```
 
-### 1. Test & Validate Phase
-
-**Purpose**: Quality assurance  
-**Trigger**:
-
-- Pushes to `stage` branch
-- New version tags (`v*`)  
-  **Key Actions**:
-- Creates isolated Python 3.10 environment
-- Installs dependencies + test packages
-- Executes complete test suite against in-memory SQLite
-- Generates coverage reports
-- Enforces 100% service layer test coverage
-
-**Exit Criteria**: All tests must pass before progression
-
-### 2. Merge Phase
-
-**Purpose**: Stable code promotion  
-**Dependencies**: Requires Test Phase success  
-**Automation**:
-
-- Auto-merges `stage` → `main` using branch protection rules
-- Validates no merge conflicts exist
-- Maintains linear commit history
-
-### 3. Release Phase
-
-**Purpose**: Versioned artifact delivery  
-**Key Processes**:
-
-1. **Semantic Versioning**:
-
-   - Analyzes commit history for version bump type
-   - Generates new `vX.Y.Z` tag
-   - Updates `setup.py` version automatically
-
-2. **Artifact Packaging**:
-
-   - Creates production-ready ZIP bundle
-   - Includes all runtime dependencies
-
-3. **Release Management**:
-   - Publishes GitHub Release with changelog
-   - Attaches versioned binary asset
-   - Notifies stakeholders
-
-**Key Benefits**:
-
-- Zero-touch deployment from commit to production
-- Enforced quality standards
-- Traceable version history
-- Automated semantic versioning
-
 ## 📊 Project Structure
 
 ```bash
-aclimate_v3_orm/
+aclimate_v3_orm_frontend/
 │
 ├── .github/
-│ └── workflows/ # CI/CD pipeline configurations
+│   └── workflows/              # CI/CD pipeline configurations
 │
 ├── src/
-│ └── aclimate_v3_orm/
-│     ├── models/ # SQLAlchemy ORM models
-│     ├── schemas/ # Pydantic schemas for validation
-│     ├── services/ # Service layer for database operations
-│     ├── validations/ # Validation logic
-│     ├── enums/ # Application enumerations for type-safe fixed value sets
-│     └── database/ # Database connection management
+│   └── aclimate_v3_orm_frontend/
+│       ├── models/             # SQLAlchemy ORM models
+│       │   ├── __init__.py
+│       │   ├── app.py          # App model with country association
+│       │   ├── user.py         # User model with Keycloak integration
+│       │   └── ws_interested.py # Weather station interest tracking
+│       │
+│       ├── schemas/            # Pydantic schemas for validation
+│       │   ├── __init__.py
+│       │   ├── app_schema.py   # App CRUD schemas
+│       │   ├── user_schema.py  # User CRUD schemas
+│       │   └── ws_interested_schema.py # WS interest schemas
+│       │
+│       ├── services/           # Service layer for business logic
+│       │   ├── __init__.py
+│       │   ├── base_service.py # Generic base service class
+│       │   ├── app_service.py  # App-specific operations
+│       │   ├── user_service.py # User management operations
+│       │   └── ws_interested_service.py # Weather station operations
+│       │
+│       ├── validations/        # Business validation logic
+│       │   ├── __init__.py
+│       │   ├── app_validator.py # App validation rules
+│       │   ├── user_validator.py # User validation rules
+│       │   └── ws_interested_validator.py # WS validation rules
+│       │
+│       ├── enums/              # Type-safe enumerations
+│       │   ├── __init__.py
+│       │   └── profile_type.py # User profile types (FARMER, TECHNICIAN)
+│       │
+│       ├── database/           # Database connection management
+│       │   ├── __init__.py
+│       │   └── base.py         # SQLAlchemy base configuration
+│       │
+│       └── __init__.py
 │
-├── tests/ # Test suite organized by service
-├── pyproject.toml # Package configuration
-└── requirements.txt # Package dependencies
+├── tests/                      # Test suite organized by service
+│   ├── conftest.py            # Test configuration and fixtures
+│   ├── test_app.py            # App service tests
+│   ├── test_user.py           # User service tests
+│   ├── test_ws_interested.py  # Weather station tests
+│   └── test_enums.py          # Enum functionality tests
+│
+├── pyproject.toml             # Package configuration
+├── requirements.txt           # Package dependencies
+└── README.md                  # This documentation
 ```
+
+## 🔗 Database Schema
+
+### Entity Relationships
+
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────────┐
+│     App     │    │    User     │    │  WsInterested   │
+├─────────────┤    ├─────────────┤    ├─────────────────┤
+│ id (PK)     │◄──┐│ id (PK)     │◄──┐│ id (PK)         │
+│ name        │   └│ app_id (FK) │   └│ user_id (FK)    │
+│ country_    │    │ ext_key_    │    │ ws_ext_id       │
+│ ext_id      │    │ clock_id    │    │ notification    │
+│ enable      │    │ profile     │    │ (JSON)          │
+│ register    │    │ enable      │    └─────────────────┘
+│ updated     │    │ register    │
+└─────────────┘    │ updated     │
+                   └─────────────┘
+```
+
+### Key Features:
+
+- **App**: Application configurations per country
+- **User**: User management with Keycloak integration and profile types
+- **WsInterested**: Flexible notification preferences stored as JSON
+- **ProfileType Enum**: Type-safe user classification (FARMER, TECHNICIAN)
+
+## 🛠️ Development
+
+### Adding New Models
+
+1. Create model in `src/aclimate_v3_orm_frontend/models/`
+2. Define Pydantic schemas in `src/aclimate_v3_orm_frontend/schemas/`
+3. Implement service in `src/aclimate_v3_orm_frontend/services/`
+4. Add validation logic in `src/aclimate_v3_orm_frontend/validations/`
+5. Create comprehensive tests in `tests/`
