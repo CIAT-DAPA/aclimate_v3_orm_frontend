@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aclimate_v3_orm_frontend"
-version = "v0.0.1"
+version = "v0.0.2"
 description = "ORM for AClimate frontend database and its methods to manage users and interested locations"
 readme = "README.md"
 requires-python = ">=3.10"
