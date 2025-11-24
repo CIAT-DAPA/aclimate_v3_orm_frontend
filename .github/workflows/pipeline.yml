@@ -35,7 +35,7 @@ jobs:
 
       - name: Run Tests with pytest
         env:
-          DATABASE_URL: "sqlite:///:memory:"  # Base de datos SQLite en RAM (sin archivo)
+          DATABASE_URL_FRONT: "sqlite:///:memory:"  # Base de datos SQLite en RAM (sin archivo)
         run: |
           source env/bin/activate
           PYTHONPATH=$PYTHONPATH:./src pytest tests/

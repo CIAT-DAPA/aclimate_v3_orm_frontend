@@ -10,12 +10,12 @@ from contextlib import contextmanager
 load_dotenv()
 
 # Database configuration
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    raise ValueError("DATABASE_URL not found in environment variables")
+DATABASE_URL_FRONT = os.getenv("DATABASE_URL_FRONT")
+if not DATABASE_URL_FRONT:
+    raise ValueError("DATABASE_URL_FRONT not found in environment variables")
 
 # Create SQLAlchemy engine
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL_FRONT)
 
 # Configure local session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
