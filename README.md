@@ -59,7 +59,7 @@ Create a file named `.env` with these configurations:
 #### PostgreSQL
 
 ```ini
-DATABASE_URL=postgresql://username:password@localhost:5432/database
+DATABASE_URL_FRONT=postgresql://username:password@localhost:5432/database
 ```
 
 ### Option 2: Setting Environment Variables
@@ -67,13 +67,13 @@ DATABASE_URL=postgresql://username:password@localhost:5432/database
 - Windows (CMD/PowerShell)
 
 ```bash
-set DATABASE_URL=postgresql://username:password@localhost:5432/database
+set DATABASE_URL_FRONT=postgresql://username:password@localhost:5432/database
 ```
 
 - Linux/Ubuntu (Terminal)
 
 ```bash
-export DATABASE_URL="postgresql://username:password@localhost:5432/database"
+export DATABASE_URL_FRONT="postgresql://username:password@localhost:5432/database"
 ```
 
 > [!NOTE]  
